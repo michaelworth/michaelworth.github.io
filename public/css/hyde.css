@@ -235,7 +235,8 @@ a:focus {
 /* Masthead content */
 .masthead h1 {
   margin-top: 0;
-  font-family: "Abril Fatface";
+  font-family: Roboto Condensed, sans-serif;
+  font-weight: 700;
 }
 .masthead .lead {
   margin-bottom: 0;
@@ -260,7 +261,7 @@ a:focus {
 /* Responsive masthead */
 @media (min-width: 768px) {
   .masthead-inner {
-    padding: 40px;
+    padding: 25px;
   }
 }
 @media (min-width: 990px) {
@@ -280,10 +281,10 @@ a:focus {
     left: 0;
   }
   .masthead h1 {
-    font-size: 64px;
+    font-size: 56px;
   }
   .colophon {
-    margin-top: 40px;
+    margin-top: 36px;
   }
 }
 
