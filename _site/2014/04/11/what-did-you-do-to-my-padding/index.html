@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+
+  <title>
+    Hey setBackgroundResource(), what did you do to my padding? &middot; 
+    DroidBytes
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/public/css/hyde.css">
+  <link rel="stylesheet" href="/public/css/syntax.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400italic,400,600,700|Abril+Fatface">
+  <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:700' rel='stylesheet' type='text/css'>
+  
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/public/touch-icon-144-precomposed.png">
+  <link rel="shortcut icon" href="/public/favicon.png">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+</head>
+
+
+  <body class="theme-base-0b">
+
+    <header class="masthead">
+      <div class="masthead-inner">
+        <h1>DroidBytes</h1>
+        <p class="lead">Random thoughts and findings from a professional Android developer</p>
+
+        <div class="colophon">
+          <p>&copy; 2014 Mike Worth</br>All rights reserved.</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="content container">
+      <div class="post">
+  <h1>Hey setBackgroundResource(), what did you do to my padding?</h1>
+  <span class="post-date">11 Apr 2014</span>
+  <p>While playing around with a pretty simple list view item layout, I had just perfected my margins and positioning for all the components and it was time to update the background with a custom nine patch image. For implementation specific reasons, I had to do this in code and after pushing the APK to the device I noticed that all my padding was gone.</p>
+
+<p>What gives?</p>
+
+<p>Well, since the nine patches define their own padding, Android correctly stomped out my XML padding and used the nine patchs' own settings. In this case, I didn't want to create a custom nine patch just for this one view so I simply stored the padding values before setting the drawable and reapplied them afterwards.</p>
+
+<div class="highlight"><pre><code class="java"><span class="kd">private</span> <span class="kt">void</span> <span class="nf">setBackgroundResourceAndKeepPadding</span><span class="o">(</span><span class="n">View</span> <span class="n">view</span><span class="o">,</span> <span class="kt">int</span> <span class="n">resourceId</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="n">left</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="na">getPaddingLeft</span><span class="o">();</span>
+    <span class="kt">int</span> <span class="n">right</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="na">getPaddingRight</span><span class="o">();</span>
+    <span class="kt">int</span> <span class="n">top</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="na">getPaddingTop</span><span class="o">();</span>
+    <span class="kt">int</span> <span class="n">bottom</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="na">getPaddingBottom</span><span class="o">();</span>
+
+    <span class="n">view</span><span class="o">.</span><span class="na">setBackgroundResource</span><span class="o">(</span><span class="n">resourceId</span><span class="o">);</span>
+    <span class="n">view</span><span class="o">.</span><span class="na">setPadding</span><span class="o">(</span><span class="n">left</span><span class="o">,</span> <span class="n">top</span><span class="o">,</span> <span class="n">right</span><span class="o">,</span> <span class="n">bottom</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div>
+
+
+</div>
+
+<div class="related">
+  <h2>Related Posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/2014/04/12/animating-a-header-out-of-a-listview/">
+            Animating a header out of a ListView
+            <small>12 Apr 2014</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/2014/04/10/purpose-and-direction/">
+            Purpose and direction
+            <small>10 Apr 2014</small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</div>
+
+    </div>
+
+  </body>
+</html>
