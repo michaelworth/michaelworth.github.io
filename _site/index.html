@@ -51,158 +51,18 @@
 
     <span class="post-date">12 Apr 2014</span>
 
-    <p>When we enabled Social Sign In for our mobile users in the HootSuite app, we wanted to keep the flow simple and light with as few screens and dialogs as possible. This meant that we needed to defer collecting the user’s email address in certain cases until after sign-up.</p>
+    <div class="post-content-truncate">
+      
+        <p>When we enabled Social Sign In for our mobile users in the HootSuite app, we wanted to keep the flow simple and light with as few screens and dialogs as possible. This meant that we needed to defer collecting the user’s email address in certain cases until after sign-up.</p>
 
 <p>As such, we wanted to surface an inline notification asking users to enter their email. The design was pretty straightforward: put a dialog inline with the main tab view content where the user can insert the information or dismiss the dialog.</p>
 
 <p>I’ve done this a few times before, and the cleanest way to implement this in my opinion is to create the inline element as a view and add it as a header to the <code>ListView</code> object. What I never really had to do before was dismiss it away with a collapsing animation.</p>
 
-<p>The logic behind such an animation is not rocket science. First, you’ll want to fade the content out using an <code>AlphaAnimation</code>. Second, use a custom animation to apply a transformation on the view’s <code>LayoutParams.height</code> property. Finally, combine the two by using an <code>AnimationSet</code>, apply an appropriate duration and interpolator, and mark <code>fillAfter</code> as true to keep the final state after the animation completes. The resulting code is shown here:</p>
 
-<div class="highlight"><pre><code class="java"><span class="kd">final</span> <span class="kt">int</span> <span class="n">height</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">getMeasuredHeight</span><span class="o">();</span>
-<span class="kd">final</span> <span class="n">AbsListView</span><span class="o">.</span><span class="na">LayoutParams</span> <span class="n">layoutParams</span> <span class="o">=</span> <span class="o">(</span><span class="n">AbsListView</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">)</span> <span class="k">this</span><span class="o">.</span><span class="na">getLayoutParams</span><span class="o">();</span>
-
-<span class="n">AlphaAnimation</span> <span class="n">alphaAnimation</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AlphaAnimation</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
-<span class="n">alphaAnimation</span><span class="o">.</span><span class="na">setDuration</span><span class="o">(</span><span class="mi">400</span><span class="o">);</span>
-
-<span class="n">Animation</span> <span class="n">translationAnimation</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Animation</span><span class="o">()</span> <span class="o">{</span>
-
-    <span class="nd">@Override</span>
-    <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">applyTransformation</span><span class="o">(</span><span class="kt">float</span> <span class="n">interpolatedTime</span><span class="o">,</span> <span class="n">Transformation</span> <span class="n">t</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">layoutParams</span><span class="o">.</span><span class="na">height</span> <span class="o">=</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="n">height</span> <span class="o">*</span> <span class="o">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">interpolatedTime</span><span class="o">));</span>
-        <span class="n">TwitterEmailView</span><span class="o">.</span><span class="na">this</span><span class="o">.</span><span class="na">setLayoutParams</span><span class="o">(</span><span class="n">layoutParams</span><span class="o">);</span>
-        <span class="n">Log</span><span class="o">.</span><span class="na">i</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;applyTransformation: height = &quot;</span> <span class="o">+</span> <span class="n">layoutParams</span><span class="o">.</span><span class="na">height</span><span class="o">);</span>
-    <span class="o">}</span>
-
-    <span class="nd">@Override</span>
-    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">willChangeBounds</span><span class="o">()</span> <span class="o">{</span>
-        <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
-    <span class="o">}</span>
-<span class="o">};</span>
-
-<span class="n">translationAnimation</span><span class="o">.</span><span class="na">setDuration</span><span class="o">(</span><span class="mi">400</span><span class="o">);</span>
-<span class="n">translationAnimation</span><span class="o">.</span><span class="na">setStartOffset</span><span class="o">(</span><span class="mi">300</span><span class="o">);</span>
-
-<span class="n">AnimationSet</span> <span class="n">set</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AnimationSet</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
-<span class="n">set</span><span class="o">.</span><span class="na">setInterpolator</span><span class="o">(</span><span class="k">new</span> <span class="n">AccelerateDecelerateInterpolator</span><span class="o">());</span>
-<span class="n">set</span><span class="o">.</span><span class="na">addAnimation</span><span class="o">(</span><span class="n">alphaAnimation</span><span class="o">);</span>
-<span class="n">set</span><span class="o">.</span><span class="na">addAnimation</span><span class="o">(</span><span class="n">translationAnimation</span><span class="o">);</span>
-<span class="n">set</span><span class="o">.</span><span class="na">setFillAfter</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
-
-<span class="n">set</span><span class="o">.</span><span class="na">setAnimationListener</span><span class="o">(</span><span class="k">new</span> <span class="n">Animation</span><span class="o">.</span><span class="na">AnimationListener</span><span class="o">()</span> <span class="o">{</span>
-    <span class="nd">@Override</span>
-    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onAnimationStart</span><span class="o">(</span><span class="n">Animation</span> <span class="n">animation</span><span class="o">)</span> <span class="o">{</span>
-
-    <span class="o">}</span>
-
-    <span class="nd">@Override</span>
-    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onAnimationEnd</span><span class="o">(</span><span class="n">Animation</span> <span class="n">animation</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">Log</span><span class="o">.</span><span class="na">i</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&quot;onAnimationEnd&quot;</span><span class="o">);</span>
-        <span class="o">((</span><span class="n">ListView</span><span class="o">)</span> <span class="n">TwitterEmailView</span><span class="o">.</span><span class="na">this</span><span class="o">.</span><span class="na">getParent</span><span class="o">()).</span><span class="na">removeHeaderView</span><span class="o">(</span><span class="n">TwitterEmailView</span><span class="o">.</span><span class="na">this</span><span class="o">);</span>
-    <span class="o">}</span>
-
-    <span class="nd">@Override</span>
-    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onAnimationRepeat</span><span class="o">(</span><span class="n">Animation</span> <span class="n">animation</span><span class="o">)</span> <span class="o">{</span>
-
-    <span class="o">}</span>
-<span class="o">});</span>
-
-<span class="k">this</span><span class="o">.</span><span class="na">startAnimation</span><span class="o">(</span><span class="n">set</span><span class="o">);</span>
-</code></pre></div>
-
-
-<p>But when I ran it on my test device, the result was less than satisfactory:</p>
-
-<iframe width="420" height="315" src="http://www.youtube.com/embed/_ya63Fg6BkA" frameborder="0" allowfullscreen></iframe>
-
-
-<p>As you can see in the video above, the height property resets after the animation completes. I added some logcat messages and verified that the <code>LayoutParams.height</code> at the end of the animation was still 0. Adding a call to set the view as <code>GONE</code> had the same result.</p>
-
-<p>My assumption here is that the <code>ListView</code>  reverts the header cell to it's original height, or to the height of a normal list item, due to the layout parameter not being preserved by the <code>fillAfter</code> setting. The best solution then appeared to be to remove the header from the <code>ListView</code> after the animation completes.</p>
-
-<iframe width="420" height="315" src="http://www.youtube.com/embed/sXSyHeH_txw" frameborder="0" allowfullscreen></iframe>
-
-
-<p>This basically works except that occasionally I can see a noticeable flicker after the animation finishes and before the view is removed. Here's the same video slowed down by 50% so YouTube doesn't filter out the frames showing the flicker.</p>
-
-<iframe width="420" height="315" src="http://www.youtube.com/embed/Use-4hvB1nw" frameborder="0" allowfullscreen></iframe>
-
-
-<p>I then decided to try re-writing the code using the <code>ValueAnimator</code> APIs that were made available after Honeycomb.</p>
-
-<div class="highlight"><pre><code class="java"><span class="kd">final</span> <span class="kt">int</span> <span class="n">height</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">getMeasuredHeight</span><span class="o">();</span>
-<span class="kd">final</span> <span class="n">AbsListView</span><span class="o">.</span><span class="na">LayoutParams</span> <span class="n">layoutParams</span> <span class="o">=</span> <span class="o">(</span><span class="n">AbsListView</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">)</span> <span class="k">this</span><span class="o">.</span><span class="na">getLayoutParams</span><span class="o">();</span>
-
-<span class="n">ObjectAnimator</span> <span class="n">alphaAnimator</span> <span class="o">=</span> <span class="n">ObjectAnimator</span><span class="o">.</span><span class="na">ofFloat</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="s">&quot;alpha&quot;</span><span class="o">,</span> <span class="mi">0</span><span class="n">f</span><span class="o">).</span><span class="na">setDuration</span><span class="o">(</span><span class="mi">300</span><span class="o">);</span>
-
-<span class="n">ValueAnimator</span> <span class="n">heightAnimator</span> <span class="o">=</span> <span class="n">ValueAnimator</span><span class="o">.</span><span class="na">ofInt</span><span class="o">(</span><span class="n">height</span><span class="o">,</span> <span class="mi">0</span><span class="o">).</span><span class="na">setDuration</span><span class="o">(</span><span class="mi">400</span><span class="o">);</span>
-<span class="n">heightAnimator</span><span class="o">.</span><span class="na">addUpdateListener</span><span class="o">(</span><span class="k">new</span> <span class="n">ValueAnimator</span><span class="o">.</span><span class="na">AnimatorUpdateListener</span><span class="o">()</span> <span class="o">{</span>
-    <span class="nd">@Override</span>
-    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onAnimationUpdate</span><span class="o">(</span><span class="n">ValueAnimator</span> <span class="n">valueAnimator</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">layoutParams</span><span class="o">.</span><span class="na">height</span> <span class="o">=</span> <span class="o">(</span><span class="n">Integer</span><span class="o">)</span> <span class="n">valueAnimator</span><span class="o">.</span><span class="na">getAnimatedValue</span><span class="o">();</span>
-        <span class="n">TwitterEmailView</span><span class="o">.</span><span class="na">this</span><span class="o">.</span><span class="na">setLayoutParams</span><span class="o">(</span><span class="n">layoutParams</span><span class="o">);</span>
-    <span class="o">}</span>
-<span class="o">});</span>
-
-<span class="n">AnimatorSet</span> <span class="n">set</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AnimatorSet</span><span class="o">();</span>
-<span class="n">set</span><span class="o">.</span><span class="na">playSequentially</span><span class="o">(</span><span class="n">alphaAnimator</span><span class="o">,</span> <span class="n">heightAnimator</span><span class="o">);</span>
-<span class="n">set</span><span class="o">.</span><span class="na">setInterpolator</span><span class="o">(</span><span class="k">new</span> <span class="n">AccelerateDecelerateInterpolator</span><span class="o">());</span>
-<span class="n">set</span><span class="o">.</span><span class="na">addListener</span><span class="o">(</span><span class="k">new</span> <span class="n">AnimatorListenerAdapter</span><span class="o">()</span> <span class="o">{</span>
-    <span class="nd">@Override</span>
-    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onAnimationEnd</span><span class="o">(</span><span class="n">Animator</span> <span class="n">animation</span><span class="o">)</span> <span class="o">{</span>
-        <span class="o">((</span><span class="n">ListView</span><span class="o">)</span> <span class="n">TwitterEmailView</span><span class="o">.</span><span class="na">this</span><span class="o">.</span><span class="na">getParent</span><span class="o">()).</span><span class="na">removeHeaderView</span><span class="o">(</span><span class="n">TwitterEmailView</span><span class="o">.</span><span class="na">this</span><span class="o">);</span>
-    <span class="o">}</span>
-<span class="o">});</span>
-
-<span class="n">set</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
-</code></pre></div>
-
-
-<p>Essentially the same thing, just cleaner and using modern APIs. The interesting bit is that the resulting animation doesn’t have the flicker anymore. The other good news is that this code can be used on Gingerbread as well by using the <a title="NineOldAndroids" href="https://github.com/JakeWharton/NineOldAndroids/" target="_blank">NineOldAndroids</a> library.</p>
-
-<iframe width="420" height="315" src="http://www.youtube.com/embed/LUJFIPK_HLs" frameborder="0" allowfullscreen></iframe>
-
-
-<p>To try and understand the difference between the two variants better, I built out a new app to host a simple <code>ListView</code> and apply the same animation source to it and see what the results were.</p>
-
-<p>Using this new codebase, I still saw the flicker of the old pre-Honeycomb animation technique as I did in the HootSuite application which proved to me that it wasn't occurring due to some other layout issue. As expected, the Honeycomb variant worked as it did before with no flicker.</p>
-
-<p>I theorized that maybe there was a delay in the call to <code>onAnimationEnd</code> for the pre-Honeycomb method so I added in some logging to measure the time delta of both methods from the last update/transformation call to the <code>onAnimationEnd</code> call. The timing was rather variable but the V1 method ranged from 20ms-63ms and V2 ranged from 50ms-160ms. Clearly, the delay wasn't involved in that way.</p>
-
-<p>I then created a class that extended <code>FrameLayout</code> so that I could put in logging in the <code>onLayout()</code> method to see if that might shed some light on the situation. The V1 method showed the layout bottom progressing towards 0 but jumps up suddenly when the flicker occurs. This layout update comes <em>before</em> the final <code>onAnimationEnd</code> callback is called. V2 doesn't show this and instead stays at zero and then calls the callback.</p>
-
-<p>At this point, I reached out to some trusted friends in the Android community for insight and got a huge tip from my pal Ryan Wheedon at AutoTrader. He had run into this in the past and pointed out that <code>ListView</code> has a bug where it handles list children with a height of 0 as <code>MeasureSpec.UNSPECIFIED</code> which in effect causes the view to measure as <code>WRAP_CONTENT</code>.</p>
-
-<p>I verified this by first adding more logging to my extended <code>FrameLayout</code> which indeed showed that the <code>MeasureSpec</code> for the <code>FrameLayout</code> was changing from <code>MeasureSpec.EXACTLY</code> to <code>MeasureSpec.UNSPECIFIED</code> when the flicker occurred. This resulted in the <code>onMeasure</code> method measuring how much height is required by the view rather than just setting the height to 0 as requested.</p>
-
-<p>So why does this happen? Well take a look at the following code taken from <code>setupChild(...)</code> from <code>ListView</code>:</p>
-
-<div class="highlight"><pre><code class="java"><span class="k">if</span> <span class="o">(</span><span class="n">needToMeasure</span><span class="o">)</span> <span class="o">{</span>
-    <span class="kt">int</span> <span class="n">childWidthSpec</span> <span class="o">=</span> <span class="n">ViewGroup</span><span class="o">.</span><span class="na">getChildMeasureSpec</span><span class="o">(</span><span class="n">mWidthMeasureSpec</span><span class="o">,</span>
-            <span class="n">mListPadding</span><span class="o">.</span><span class="na">left</span> <span class="o">+</span> <span class="n">mListPadding</span><span class="o">.</span><span class="na">right</span><span class="o">,</span> <span class="n">p</span><span class="o">.</span><span class="na">width</span><span class="o">);</span>
-    <span class="kt">int</span> <span class="n">lpHeight</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="na">height</span><span class="o">;</span>
-    <span class="kt">int</span> <span class="n">childHeightSpec</span><span class="o">;</span>
-    <span class="k">if</span> <span class="o">(</span><span class="n">lpHeight</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
-        <span class="n">childHeightSpec</span> <span class="o">=</span> <span class="n">MeasureSpec</span><span class="o">.</span><span class="na">makeMeasureSpec</span><span class="o">(</span><span class="n">lpHeight</span><span class="o">,</span> <span class="n">MeasureSpec</span><span class="o">.</span><span class="na">EXACTLY</span><span class="o">);</span>
-    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-        <span class="n">childHeightSpec</span> <span class="o">=</span> <span class="n">MeasureSpec</span><span class="o">.</span><span class="na">makeMeasureSpec</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">MeasureSpec</span><span class="o">.</span><span class="na">UNSPECIFIED</span><span class="o">);</span>
-    <span class="o">}</span>
-    <span class="n">child</span><span class="o">.</span><span class="na">measure</span><span class="o">(</span><span class="n">childWidthSpec</span><span class="o">,</span> <span class="n">childHeightSpec</span><span class="o">);</span>
-<span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-    <span class="n">cleanupLayoutState</span><span class="o">(</span><span class="n">child</span><span class="o">);</span>
-<span class="o">}</span>
-</code></pre></div>
-
-
-<p>Therefore, if the height specified in the <code>measureSpec</code> is 0, it forces the new <code>measureSpec</code> to be <code>MeasureSpec.UNSPECIFIED</code>. Not exactly desired behaviour for this animation.</p>
-
-<p>So how to fix V1? I was able to get away with overriding <code>onMeasure</code> to first check if the height <code>measureSpec</code> is <code>MeasureSpec.UNSPECIFIED</code> and simply force it back to <code>MeasureSpec.EXACTLY</code>. This might not be a good solution for all situations since it prevents the use of <code>WRAP_CONTENT</code> in the layout XML.</p>
-
-<p>The final mystery is why this doesn't happen for V2 if the problem is due to <code>ListView</code>? Ryan also pointed out that header height change calculation was slightly different between the two versions. This caused V1 to reach 0 before the final animation cycle and then measure itself with the incorrect <code>MeasureSpec</code> just before before being removed. V2 set the view height to 0 in the final cycle and removed it before it can measure itself again. If the math in V2 were changed to match exactly it would show the same flicker as V1.</p>
-
-<p>I’ve posted the source of the demo application to GitHub for people to take a look at and play with.
-<a href="https://github.com/michaelworth/HeaderAnimationDemo">https://github.com/michaelworth/HeaderAnimationDemo</a></p>
-
+        <a href="/2014/04/12/animating-a-header-out-of-a-listview/">Continue...</a>
+      
+    </div>
   </div>
   
   <div class="post">
@@ -214,7 +74,9 @@
 
     <span class="post-date">11 Apr 2014</span>
 
-    <p>While playing around with a pretty simple list view item layout, I had just perfected my margins and positioning for all the components and it was time to update the background with a custom nine patch image. For implementation specific reasons, I had to do this in code and after pushing the APK to the device I noticed that all my padding was gone.</p>
+    <div class="post-content-truncate">
+      
+        <p>While playing around with a pretty simple list view item layout, I had just perfected my margins and positioning for all the components and it was time to update the background with a custom nine patch image. For implementation specific reasons, I had to do this in code and after pushing the APK to the device I noticed that all my padding was gone.</p>
 
 <p>What gives?</p>
 
@@ -232,6 +94,8 @@
 </code></pre></div>
 
 
+      
+    </div>
   </div>
   
   <div class="post">
@@ -243,7 +107,9 @@
 
     <span class="post-date">10 Apr 2014</span>
 
-    <p>Another developer blog is born...</p>
+    <div class="post-content-truncate">
+      
+        <p>Another developer blog is born...</p>
 
 <p>First off, I'm not Romain Guy or Jake Wharton, so don't expect brilliant insight into Android's view rendering or magical libraries developed overnight that reduce boilerplate code by 90%.</p>
 
@@ -251,6 +117,8 @@
 
 <p>Let's see how this goes...</p>
 
+      
+    </div>
   </div>
   
 </div>

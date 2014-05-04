@@ -4,7 +4,7 @@
  <title>DroidBytes</title>
  <link href="http://michaelworth.github.io/atom.xml" rel="self"/>
  <link href="http://michaelworth.github.io/"/>
- <updated>2014-04-28T22:02:34-07:00</updated>
+ <updated>2014-05-04T15:40:19-07:00</updated>
  <id>http://michaelworth.github.io</id>
  <author>
    <name>Mike Worth</name>
@@ -22,6 +22,9 @@
 &lt;p&gt;As such, we wanted to surface an inline notification asking users to enter their email. The design was pretty straightforward: put a dialog inline with the main tab view content where the user can insert the information or dismiss the dialog.&lt;/p&gt;
 
 &lt;p&gt;I’ve done this a few times before, and the cleanest way to implement this in my opinion is to create the inline element as a view and add it as a header to the &lt;code&gt;ListView&lt;/code&gt; object. What I never really had to do before was dismiss it away with a collapsing animation.&lt;/p&gt;
+
+&lt;!-- more --&gt;
+
 
 &lt;p&gt;The logic behind such an animation is not rocket science. First, you’ll want to fade the content out using an &lt;code&gt;AlphaAnimation&lt;/code&gt;. Second, use a custom animation to apply a transformation on the view’s &lt;code&gt;LayoutParams.height&lt;/code&gt; property. Finally, combine the two by using an &lt;code&gt;AnimationSet&lt;/code&gt;, apply an appropriate duration and interpolator, and mark &lt;code&gt;fillAfter&lt;/code&gt; as true to keep the final state after the animation completes. The resulting code is shown here:&lt;/p&gt;
 
