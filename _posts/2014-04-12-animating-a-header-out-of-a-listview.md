@@ -9,6 +9,8 @@ As such, we wanted to surface an inline notification asking users to enter their
 
 I’ve done this a few times before, and the cleanest way to implement this in my opinion is to create the inline element as a view and add it as a header to the `ListView` object. What I never really had to do before was dismiss it away with a collapsing animation.
 
+<!-- more -->
+
 The logic behind such an animation is not rocket science. First, you’ll want to fade the content out using an `AlphaAnimation`. Second, use a custom animation to apply a transformation on the view’s `LayoutParams.height` property. Finally, combine the two by using an `AnimationSet`, apply an appropriate duration and interpolator, and mark `fillAfter` as true to keep the final state after the animation completes. The resulting code is shown here:
 
 {% highlight java %}
