@@ -53,11 +53,11 @@
 
     <div class="post-content-truncate">
       
-        <p>When we enabled Social Sign In for our mobile users in the HootSuite app, we wanted to keep the flow simple and light with as few screens and dialogs as possible. This meant that we needed to defer collecting the user’s email address in certain cases until after sign-up.</p>
+        <p>When we enabled Social Sign In for our mobile users in the HootSuite Android app, we wanted to keep the flow simple and light with as few screens and dialogs as possible. This meant that we needed to defer collecting the user’s email address in certain cases until after sign-up.</p>
 
 <p>As such, we wanted to surface an inline notification asking users to enter their email. The design was pretty straightforward: put a dialog inline with the main tab view content where the user can insert the information or dismiss the dialog.</p>
 
-<p>I’ve done this a few times before, and the cleanest way to implement this in my opinion is to create the inline element as a view and add it as a header to the <code>ListView</code> object. What I never really had to do before was dismiss it away with a collapsing animation.</p>
+<p>I had done this a few times before, and the cleanest way to implement this in my opinion is to create the inline element as a view and add it as a header to the <code>ListView</code> object. What I never really had to do before was dismiss it away with a collapsing animation. When implementing that animation, I ran into an issue with <code>ListView</code> that I did not expect to find.</p>
 
 
         <a href="/2014/04/12/animating-a-header-out-of-a-listview/">Continue...</a>

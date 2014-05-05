@@ -4,7 +4,7 @@
  <title>DroidBytes</title>
  <link href="http://michaelworth.github.io/atom.xml" rel="self"/>
  <link href="http://michaelworth.github.io/"/>
- <updated>2014-05-04T15:40:19-07:00</updated>
+ <updated>2014-05-04T17:50:35-07:00</updated>
  <id>http://michaelworth.github.io</id>
  <author>
    <name>Mike Worth</name>
@@ -17,11 +17,11 @@
    <link href="http://michaelworth.github.io/2014/04/12/animating-a-header-out-of-a-listview/"/>
    <updated>2014-04-12T00:00:00-07:00</updated>
    <id>http://michaelworth.github.io/2014/04/12/animating-a-header-out-of-a-listview</id>
-   <content type="html">&lt;p&gt;When we enabled Social Sign In for our mobile users in the HootSuite app, we wanted to keep the flow simple and light with as few screens and dialogs as possible. This meant that we needed to defer collecting the user’s email address in certain cases until after sign-up.&lt;/p&gt;
+   <content type="html">&lt;p&gt;When we enabled Social Sign In for our mobile users in the HootSuite Android app, we wanted to keep the flow simple and light with as few screens and dialogs as possible. This meant that we needed to defer collecting the user’s email address in certain cases until after sign-up.&lt;/p&gt;
 
 &lt;p&gt;As such, we wanted to surface an inline notification asking users to enter their email. The design was pretty straightforward: put a dialog inline with the main tab view content where the user can insert the information or dismiss the dialog.&lt;/p&gt;
 
-&lt;p&gt;I’ve done this a few times before, and the cleanest way to implement this in my opinion is to create the inline element as a view and add it as a header to the &lt;code&gt;ListView&lt;/code&gt; object. What I never really had to do before was dismiss it away with a collapsing animation.&lt;/p&gt;
+&lt;p&gt;I had done this a few times before, and the cleanest way to implement this in my opinion is to create the inline element as a view and add it as a header to the &lt;code&gt;ListView&lt;/code&gt; object. What I never really had to do before was dismiss it away with a collapsing animation. When implementing that animation, I ran into an issue with &lt;code&gt;ListView&lt;/code&gt; that I did not expect to find.&lt;/p&gt;
 
 &lt;!-- more --&gt;
 
@@ -87,12 +87,12 @@
 
 &lt;p&gt;As you can see in the video above, the height property resets after the animation completes. I added some logcat messages and verified that the &lt;code&gt;LayoutParams.height&lt;/code&gt; at the end of the animation was still 0. Adding a call to set the view as &lt;code&gt;GONE&lt;/code&gt; had the same result.&lt;/p&gt;
 
-&lt;p&gt;My assumption here is that the &lt;code&gt;ListView&lt;/code&gt;  reverts the header cell to it&#39;s original height, or to the height of a normal list item, due to the layout parameter not being preserved by the &lt;code&gt;fillAfter&lt;/code&gt; setting. The best solution then appeared to be to remove the header from the &lt;code&gt;ListView&lt;/code&gt; after the animation completes.&lt;/p&gt;
+&lt;p&gt;My assumption at the time was that the &lt;code&gt;ListView&lt;/code&gt; was reverting the header cell to it&#39;s original height, or to the height of a normal list item, due to the layout parameter not being preserved by the &lt;code&gt;fillAfter&lt;/code&gt; setting. The best solution then appeared to be to remove the header from the &lt;code&gt;ListView&lt;/code&gt; after the animation completed.&lt;/p&gt;
 
 &lt;iframe width=&quot;420&quot; height=&quot;315&quot; src=&quot;http://www.youtube.com/embed/sXSyHeH_txw&quot; frameborder=&quot;0&quot; allowfullscreen&gt;&lt;/iframe&gt;
 
 
-&lt;p&gt;This basically works except that occasionally I can see a noticeable flicker after the animation finishes and before the view is removed. Here&#39;s the same video slowed down by 50% so YouTube doesn&#39;t filter out the frames showing the flicker.&lt;/p&gt;
+&lt;p&gt;This worked except that I occasionally saw a noticeable flicker after the animation finished before the view was removed. Here&#39;s the same video slowed down by 50% so YouTube doesn&#39;t filter out the frames showing the flicker.&lt;/p&gt;
 
 &lt;iframe width=&quot;420&quot; height=&quot;315&quot; src=&quot;http://www.youtube.com/embed/Use-4hvB1nw&quot; frameborder=&quot;0&quot; allowfullscreen&gt;&lt;/iframe&gt;
 
@@ -127,7 +127,7 @@
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 
-&lt;p&gt;Essentially the same thing, just cleaner and using modern APIs. The interesting bit is that the resulting animation doesn’t have the flicker anymore. The other good news is that this code can be used on Gingerbread as well by using the &lt;a title=&quot;NineOldAndroids&quot; href=&quot;https://github.com/JakeWharton/NineOldAndroids/&quot; target=&quot;_blank&quot;&gt;NineOldAndroids&lt;/a&gt; library.&lt;/p&gt;
+&lt;p&gt;Essentially the same thing, just cleaner and using modern APIs. The interesting bit is that the resulting animation didn&#39;t have the flicker anymore. This variant could be used on Gingerbread as well by using the &lt;a title=&quot;NineOldAndroids&quot; href=&quot;https://github.com/JakeWharton/NineOldAndroids/&quot; target=&quot;_blank&quot;&gt;NineOldAndroids&lt;/a&gt; library.&lt;/p&gt;
 
 &lt;iframe width=&quot;420&quot; height=&quot;315&quot; src=&quot;http://www.youtube.com/embed/LUJFIPK_HLs&quot; frameborder=&quot;0&quot; allowfullscreen&gt;&lt;/iframe&gt;
 
@@ -138,9 +138,9 @@
 
 &lt;p&gt;I theorized that maybe there was a delay in the call to &lt;code&gt;onAnimationEnd&lt;/code&gt; for the pre-Honeycomb method so I added in some logging to measure the time delta of both methods from the last update/transformation call to the &lt;code&gt;onAnimationEnd&lt;/code&gt; call. The timing was rather variable but the V1 method ranged from 20ms-63ms and V2 ranged from 50ms-160ms. Clearly, the delay wasn&#39;t involved in that way.&lt;/p&gt;
 
-&lt;p&gt;I then created a class that extended &lt;code&gt;FrameLayout&lt;/code&gt; so that I could put in logging in the &lt;code&gt;onLayout()&lt;/code&gt; method to see if that might shed some light on the situation. The V1 method showed the layout bottom progressing towards 0 but jumps up suddenly when the flicker occurs. This layout update comes &lt;em&gt;before&lt;/em&gt; the final &lt;code&gt;onAnimationEnd&lt;/code&gt; callback is called. V2 doesn&#39;t show this and instead stays at zero and then calls the callback.&lt;/p&gt;
+&lt;p&gt;I then created a class that extended &lt;code&gt;FrameLayout&lt;/code&gt; so that I could put in logging in the &lt;code&gt;onLayout()&lt;/code&gt; method to see if that might shed some light on the situation. The V1 method showed the layout bottom progressing towards 0 but jumped up suddenly when the flicker occured. This layout update came &lt;em&gt;before&lt;/em&gt; the final &lt;code&gt;onAnimationEnd&lt;/code&gt; callback was called. V2 doesn&#39;t show this and instead stays at zero and then calls the callback.&lt;/p&gt;
 
-&lt;p&gt;At this point, I reached out to some trusted friends in the Android community for insight and got a huge tip from my pal Ryan Wheedon at AutoTrader. He had run into this in the past and pointed out that &lt;code&gt;ListView&lt;/code&gt; has a bug where it handles list children with a height of 0 as &lt;code&gt;MeasureSpec.UNSPECIFIED&lt;/code&gt; which in effect causes the view to measure as &lt;code&gt;WRAP_CONTENT&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;At this point, I reached out to some trusted friends in the Android community for insight and got a huge tip from my pal Ryan Wheedon at AutoTrader. He had run into this in the past and pointed out that &lt;code&gt;ListView&lt;/code&gt; has a &quot;feature&quot; where it handles list children with a height of 0 as &lt;code&gt;MeasureSpec.UNSPECIFIED&lt;/code&gt; which in effect causes the view to measure as &lt;code&gt;WRAP_CONTENT&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;I verified this by first adding more logging to my extended &lt;code&gt;FrameLayout&lt;/code&gt; which indeed showed that the &lt;code&gt;MeasureSpec&lt;/code&gt; for the &lt;code&gt;FrameLayout&lt;/code&gt; was changing from &lt;code&gt;MeasureSpec.EXACTLY&lt;/code&gt; to &lt;code&gt;MeasureSpec.UNSPECIFIED&lt;/code&gt; when the flicker occurred. This resulted in the &lt;code&gt;onMeasure&lt;/code&gt; method measuring how much height is required by the view rather than just setting the height to 0 as requested.&lt;/p&gt;
 
@@ -165,9 +165,9 @@
 
 &lt;p&gt;Therefore, if the height specified in the &lt;code&gt;measureSpec&lt;/code&gt; is 0, it forces the new &lt;code&gt;measureSpec&lt;/code&gt; to be &lt;code&gt;MeasureSpec.UNSPECIFIED&lt;/code&gt;. Not exactly desired behaviour for this animation.&lt;/p&gt;
 
-&lt;p&gt;So how to fix V1? I was able to get away with overriding &lt;code&gt;onMeasure&lt;/code&gt; to first check if the height &lt;code&gt;measureSpec&lt;/code&gt; is &lt;code&gt;MeasureSpec.UNSPECIFIED&lt;/code&gt; and simply force it back to &lt;code&gt;MeasureSpec.EXACTLY&lt;/code&gt;. This might not be a good solution for all situations since it prevents the use of &lt;code&gt;WRAP_CONTENT&lt;/code&gt; in the layout XML.&lt;/p&gt;
+&lt;p&gt;So how to fix V1? I was able to get away with overriding &lt;code&gt;onMeasure&lt;/code&gt; to first check if the height &lt;code&gt;measureSpec&lt;/code&gt; is &lt;code&gt;MeasureSpec.UNSPECIFIED&lt;/code&gt; and simply force it back to &lt;code&gt;MeasureSpec.EXACTLY&lt;/code&gt;. This might not be a good solution for all situations since it prevents the use of &lt;code&gt;WRAP_CONTENT&lt;/code&gt; in the layout XML. An alternative solution that doesn&#39;t have this limitation is to simply prevent the animation from giving a height of zero. Having the height shrink down to a single pixel which is then removed looked fine on my test device.&lt;/p&gt;
 
-&lt;p&gt;The final mystery is why this doesn&#39;t happen for V2 if the problem is due to &lt;code&gt;ListView&lt;/code&gt;? Ryan also pointed out that header height change calculation was slightly different between the two versions. This caused V1 to reach 0 before the final animation cycle and then measure itself with the incorrect &lt;code&gt;MeasureSpec&lt;/code&gt; just before before being removed. V2 set the view height to 0 in the final cycle and removed it before it can measure itself again. If the math in V2 were changed to match exactly it would show the same flicker as V1.&lt;/p&gt;
+&lt;p&gt;The final mystery is why this didn&#39;t happen for V2 if the problem was due to &lt;code&gt;ListView&lt;/code&gt;? Ryan also pointed out that header height change calculation was slightly different between the two versions. This caused V1 to reach 0 before the final animation cycle and then measure itself with the incorrect &lt;code&gt;MeasureSpec&lt;/code&gt; just before before being removed. V2 set the view height to 0 in the final cycle and removed it before it can measure itself again. If the math in V2 were changed to match exactly it would show the same flicker as V1.&lt;/p&gt;
 
 &lt;p&gt;I’ve posted the source of the demo application to GitHub for people to take a look at and play with.
 &lt;a href=&quot;https://github.com/michaelworth/HeaderAnimationDemo&quot;&gt;https://github.com/michaelworth/HeaderAnimationDemo&lt;/a&gt;&lt;/p&gt;
