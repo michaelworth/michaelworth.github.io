@@ -54,13 +54,13 @@
 
 <p>The logic behind such an animation is not rocket science. First, you’ll want to fade the content out using an <code>AlphaAnimation</code>. Second, use a custom animation to apply a transformation on the view’s <code>LayoutParams.height</code> property. Finally, combine the two by using an <code>AnimationSet</code>, apply an appropriate duration and interpolator, and mark <code>fillAfter</code> as true to keep the final state after the animation completes. The resulting code is shown here:</p>
 
-<div class="highlight"><pre><code class="java"><span class="kd">final</span> <span class="kt">int</span> <span class="n">height</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">getMeasuredHeight</span><span class="o">();</span>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">final</span> <span class="kt">int</span> <span class="n">height</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">getMeasuredHeight</span><span class="o">();</span>
 <span class="kd">final</span> <span class="n">AbsListView</span><span class="o">.</span><span class="na">LayoutParams</span> <span class="n">layoutParams</span> <span class="o">=</span> <span class="o">(</span><span class="n">AbsListView</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">)</span> <span class="k">this</span><span class="o">.</span><span class="na">getLayoutParams</span><span class="o">();</span>
 
-<span class="n">AlphaAnimation</span> <span class="n">alphaAnimation</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AlphaAnimation</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
+<span class="n">AlphaAnimation</span> <span class="n">alphaAnimation</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">AlphaAnimation</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>
 <span class="n">alphaAnimation</span><span class="o">.</span><span class="na">setDuration</span><span class="o">(</span><span class="mi">400</span><span class="o">);</span>
 
-<span class="n">Animation</span> <span class="n">translationAnimation</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Animation</span><span class="o">()</span> <span class="o">{</span>
+<span class="n">Animation</span> <span class="n">translationAnimation</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">Animation</span><span class="o">()</span> <span class="o">{</span>
 
     <span class="nd">@Override</span>
     <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">applyTransformation</span><span class="o">(</span><span class="kt">float</span> <span class="n">interpolatedTime</span><span class="o">,</span> <span class="n">Transformation</span> <span class="n">t</span><span class="o">)</span> <span class="o">{</span>
@@ -78,8 +78,8 @@
 <span class="n">translationAnimation</span><span class="o">.</span><span class="na">setDuration</span><span class="o">(</span><span class="mi">400</span><span class="o">);</span>
 <span class="n">translationAnimation</span><span class="o">.</span><span class="na">setStartOffset</span><span class="o">(</span><span class="mi">300</span><span class="o">);</span>
 
-<span class="n">AnimationSet</span> <span class="n">set</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AnimationSet</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
-<span class="n">set</span><span class="o">.</span><span class="na">setInterpolator</span><span class="o">(</span><span class="k">new</span> <span class="n">AccelerateDecelerateInterpolator</span><span class="o">());</span>
+<span class="n">AnimationSet</span> <span class="n">set</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">AnimationSet</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+<span class="n">set</span><span class="o">.</span><span class="na">setInterpolator</span><span class="o">(</span><span class="k">new</span> <span class="nf">AccelerateDecelerateInterpolator</span><span class="o">());</span>
 <span class="n">set</span><span class="o">.</span><span class="na">addAnimation</span><span class="o">(</span><span class="n">alphaAnimation</span><span class="o">);</span>
 <span class="n">set</span><span class="o">.</span><span class="na">addAnimation</span><span class="o">(</span><span class="n">translationAnimation</span><span class="o">);</span>
 <span class="n">set</span><span class="o">.</span><span class="na">setFillAfter</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
@@ -102,8 +102,7 @@
     <span class="o">}</span>
 <span class="o">});</span>
 
-<span class="k">this</span><span class="o">.</span><span class="na">startAnimation</span><span class="o">(</span><span class="n">set</span><span class="o">);</span>
-</code></pre></div>
+<span class="k">this</span><span class="o">.</span><span class="na">startAnimation</span><span class="o">(</span><span class="n">set</span><span class="o">);</span></code></pre></div>
 
 
 <p>But when I ran it on my test device, the result was less than satisfactory:</p>
@@ -125,7 +124,7 @@
 
 <p>I then decided to try re-writing the code using the <code>ValueAnimator</code> APIs that were made available after Honeycomb.</p>
 
-<div class="highlight"><pre><code class="java"><span class="kd">final</span> <span class="kt">int</span> <span class="n">height</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">getMeasuredHeight</span><span class="o">();</span>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">final</span> <span class="kt">int</span> <span class="n">height</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">getMeasuredHeight</span><span class="o">();</span>
 <span class="kd">final</span> <span class="n">AbsListView</span><span class="o">.</span><span class="na">LayoutParams</span> <span class="n">layoutParams</span> <span class="o">=</span> <span class="o">(</span><span class="n">AbsListView</span><span class="o">.</span><span class="na">LayoutParams</span><span class="o">)</span> <span class="k">this</span><span class="o">.</span><span class="na">getLayoutParams</span><span class="o">();</span>
 
 <span class="n">ObjectAnimator</span> <span class="n">alphaAnimator</span> <span class="o">=</span> <span class="n">ObjectAnimator</span><span class="o">.</span><span class="na">ofFloat</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="s">&quot;alpha&quot;</span><span class="o">,</span> <span class="mi">0</span><span class="n">f</span><span class="o">).</span><span class="na">setDuration</span><span class="o">(</span><span class="mi">300</span><span class="o">);</span>
@@ -139,18 +138,17 @@
     <span class="o">}</span>
 <span class="o">});</span>
 
-<span class="n">AnimatorSet</span> <span class="n">set</span> <span class="o">=</span> <span class="k">new</span> <span class="n">AnimatorSet</span><span class="o">();</span>
+<span class="n">AnimatorSet</span> <span class="n">set</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">AnimatorSet</span><span class="o">();</span>
 <span class="n">set</span><span class="o">.</span><span class="na">playSequentially</span><span class="o">(</span><span class="n">alphaAnimator</span><span class="o">,</span> <span class="n">heightAnimator</span><span class="o">);</span>
-<span class="n">set</span><span class="o">.</span><span class="na">setInterpolator</span><span class="o">(</span><span class="k">new</span> <span class="n">AccelerateDecelerateInterpolator</span><span class="o">());</span>
-<span class="n">set</span><span class="o">.</span><span class="na">addListener</span><span class="o">(</span><span class="k">new</span> <span class="n">AnimatorListenerAdapter</span><span class="o">()</span> <span class="o">{</span>
+<span class="n">set</span><span class="o">.</span><span class="na">setInterpolator</span><span class="o">(</span><span class="k">new</span> <span class="nf">AccelerateDecelerateInterpolator</span><span class="o">());</span>
+<span class="n">set</span><span class="o">.</span><span class="na">addListener</span><span class="o">(</span><span class="k">new</span> <span class="nf">AnimatorListenerAdapter</span><span class="o">()</span> <span class="o">{</span>
     <span class="nd">@Override</span>
     <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onAnimationEnd</span><span class="o">(</span><span class="n">Animator</span> <span class="n">animation</span><span class="o">)</span> <span class="o">{</span>
         <span class="o">((</span><span class="n">ListView</span><span class="o">)</span> <span class="n">TwitterEmailView</span><span class="o">.</span><span class="na">this</span><span class="o">.</span><span class="na">getParent</span><span class="o">()).</span><span class="na">removeHeaderView</span><span class="o">(</span><span class="n">TwitterEmailView</span><span class="o">.</span><span class="na">this</span><span class="o">);</span>
     <span class="o">}</span>
 <span class="o">});</span>
 
-<span class="n">set</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
-</code></pre></div>
+<span class="n">set</span><span class="o">.</span><span class="na">start</span><span class="o">();</span></code></pre></div>
 
 
 <p>Essentially the same thing, just cleaner and using modern APIs. The interesting bit is that the resulting animation didn't have the flicker anymore. This variant could be used on Gingerbread as well by using the <a title="NineOldAndroids" href="https://github.com/JakeWharton/NineOldAndroids/" target="_blank">NineOldAndroids</a> library.</p>
@@ -172,7 +170,7 @@
 
 <p>So why does this happen? Well take a look at the following code taken from <code>setupChild(...)</code> from <code>ListView</code>:</p>
 
-<div class="highlight"><pre><code class="java"><span class="k">if</span> <span class="o">(</span><span class="n">needToMeasure</span><span class="o">)</span> <span class="o">{</span>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="k">if</span> <span class="o">(</span><span class="n">needToMeasure</span><span class="o">)</span> <span class="o">{</span>
     <span class="kt">int</span> <span class="n">childWidthSpec</span> <span class="o">=</span> <span class="n">ViewGroup</span><span class="o">.</span><span class="na">getChildMeasureSpec</span><span class="o">(</span><span class="n">mWidthMeasureSpec</span><span class="o">,</span>
             <span class="n">mListPadding</span><span class="o">.</span><span class="na">left</span> <span class="o">+</span> <span class="n">mListPadding</span><span class="o">.</span><span class="na">right</span><span class="o">,</span> <span class="n">p</span><span class="o">.</span><span class="na">width</span><span class="o">);</span>
     <span class="kt">int</span> <span class="n">lpHeight</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="na">height</span><span class="o">;</span>
@@ -185,8 +183,7 @@
     <span class="n">child</span><span class="o">.</span><span class="na">measure</span><span class="o">(</span><span class="n">childWidthSpec</span><span class="o">,</span> <span class="n">childHeightSpec</span><span class="o">);</span>
 <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
     <span class="n">cleanupLayoutState</span><span class="o">(</span><span class="n">child</span><span class="o">);</span>
-<span class="o">}</span>
-</code></pre></div>
+<span class="o">}</span></code></pre></div>
 
 
 <p>Therefore, if the height specified in the <code>measureSpec</code> is 0, it forces the new <code>measureSpec</code> to be <code>MeasureSpec.UNSPECIFIED</code>. Not exactly desired behaviour for this animation.</p>
@@ -203,6 +200,15 @@
 <div class="related">
   <h2>Related Posts</h2>
   <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/2014/10/30/observing-observables/">
+            Observing Observables in Mobile with RxJava for Android
+            <small>30 Oct 2014</small>
+          </a>
+        </h3>
+      </li>
     
       <li>
         <h3>

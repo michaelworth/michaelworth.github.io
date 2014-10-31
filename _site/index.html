@@ -44,6 +44,29 @@
   
   <div class="post">
     <h1>
+      <a href="/2014/10/30/observing-observables/">
+        Observing Observables in Mobile with RxJava for Android
+      </a>
+    </h1>
+
+    <span class="post-date">30 Oct 2014</span>
+
+    <div class="post-content-truncate">
+      
+        <p>Functional Reactive Programming has been adopted in many programming communities, and for good reason. Trying to manage multiple asynchronous calls usually results in a mess of code that is not only tricky to debug, but difficult to maintain and build upon — not to mention the many “gotchas” surrounding the use of AsyncTasks on various different versions of the Android SDK. This kind of code usually ends up being the bane of an Android developer’s existence.</p>
+
+<p>Enter the Android module for RxJava.</p>
+
+<p>By using a souped up version of the Observer pattern, we gain the ability to create incredibly powerful chains of logic that can be specifically run against various threads (UI, background, etc) and that can be further modified by users of these observables to tune them exactly for the UI they are trying to populate.</p>
+
+
+        <a href="/2014/10/30/observing-observables/">Continue...</a>
+      
+    </div>
+  </div>
+  
+  <div class="post">
+    <h1>
       <a href="/2014/04/12/animating-a-header-out-of-a-listview/">
         Animating a header out of a ListView
       </a>
@@ -82,7 +105,7 @@
 
 <p>Well, since the nine patches define their own padding, Android correctly stomped out my XML padding and used the nine patchs' own settings. In this case, I didn't want to create a custom nine patch just for this one view so I simply stored the padding values before setting the drawable and reapplied them afterwards.</p>
 
-<div class="highlight"><pre><code class="java"><span class="kd">private</span> <span class="kt">void</span> <span class="nf">setBackgroundResourceAndKeepPadding</span><span class="o">(</span><span class="n">View</span> <span class="n">view</span><span class="o">,</span> <span class="kt">int</span> <span class="n">resourceId</span><span class="o">)</span> <span class="o">{</span>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">private</span> <span class="kt">void</span> <span class="nf">setBackgroundResourceAndKeepPadding</span><span class="o">(</span><span class="n">View</span> <span class="n">view</span><span class="o">,</span> <span class="kt">int</span> <span class="n">resourceId</span><span class="o">)</span> <span class="o">{</span>
     <span class="kt">int</span> <span class="n">left</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="na">getPaddingLeft</span><span class="o">();</span>
     <span class="kt">int</span> <span class="n">right</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="na">getPaddingRight</span><span class="o">();</span>
     <span class="kt">int</span> <span class="n">top</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="na">getPaddingTop</span><span class="o">();</span>
@@ -90,8 +113,7 @@
 
     <span class="n">view</span><span class="o">.</span><span class="na">setBackgroundResource</span><span class="o">(</span><span class="n">resourceId</span><span class="o">);</span>
     <span class="n">view</span><span class="o">.</span><span class="na">setPadding</span><span class="o">(</span><span class="n">left</span><span class="o">,</span> <span class="n">top</span><span class="o">,</span> <span class="n">right</span><span class="o">,</span> <span class="n">bottom</span><span class="o">);</span>
-<span class="o">}</span>
-</code></pre></div>
+<span class="o">}</span></code></pre></div>
 
 
       

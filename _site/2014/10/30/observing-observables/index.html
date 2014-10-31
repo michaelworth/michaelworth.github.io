@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+
+  <title>
+    Observing Observables in Mobile with RxJava for Android &middot; 
+    DroidBytes
+  </title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/public/css/hyde.css">
+  <link rel="stylesheet" href="/public/css/syntax.css">
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Open+Sans:300,400italic,400,600,700|Abril+Fatface">
+  <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:700' rel='stylesheet' type='text/css'>
+  
+  <!-- Icons -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/public/touch-icon-144-precomposed.png">
+  <link rel="shortcut icon" href="/public/favicon.png">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+</head>
+
+
+  <body class="theme-base-0b">
+
+    <header class="masthead">
+      <div class="masthead-inner">
+        <h1>DroidBytes</h1>
+        <p class="lead">Random thoughts and findings from a professional Android developer</p>
+
+        <div class="colophon">
+          <p>&copy; 2014 Mike Worth</br>All rights reserved.</p>
+        </div>
+      </div>
+    </header>
+
+    <div class="content container">
+      <div class="post">
+  <h1>Observing Observables in Mobile with RxJava for Android</h1>
+  <span class="post-date">30 Oct 2014</span>
+  <p>Functional Reactive Programming has been adopted in many programming communities, and for good reason. Trying to manage multiple asynchronous calls usually results in a mess of code that is not only tricky to debug, but difficult to maintain and build upon — not to mention the many “gotchas” surrounding the use of AsyncTasks on various different versions of the Android SDK. This kind of code usually ends up being the bane of an Android developer’s existence.</p>
+
+<p>Enter the Android module for RxJava.</p>
+
+<p>By using a souped up version of the Observer pattern, we gain the ability to create incredibly powerful chains of logic that can be specifically run against various threads (UI, background, etc) and that can be further modified by users of these observables to tune them exactly for the UI they are trying to populate.</p>
+
+<!-- more -->
+
+
+<p>RxJava lets you create Observables, which are streams of events that are emitted to subscribers. Subscribers can implement the following methods: onNext, onComplete, and onError.</p>
+
+<p>When an observer emits something, it is delivered to the onNext callback. onComplete is called when the observer is done emitting and tells the subscriber that there won’t be anything else coming down the pipe, and onError is called when something goes wrong like an exception being thrown or invalid data being found. Similar to onComplete, once an error is encountered, no more items will be emitted.</p>
+
+<p>If you dig into the RxJava documentation, you’ll find lots of diagrams that help explain what is going on visually. The notation guide for which is shown below. I’ll include appropriate marble diagrams for each code example that follows:</p>
+
+<p align="center"><img src="/assets/legend.png" width="650" alt="RxJava Legend" /></p>
+
+
+<p>A simple example would be to make an observable that wraps a Volley call that goes and gets a list of tweets for a particular user. The support for futures in Volley makes this pretty straightforward:</p>
+
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Tweet</span><span class="o">&gt;&gt;</span> <span class="nf">getUserTweets</span><span class="o">(...)</span> <span class="o">{</span>
+   <span class="n">RequestFuture</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Tweet</span><span class="o">&gt;&gt;</span> <span class="n">future</span> <span class="o">=</span> <span class="n">RequestFuture</span><span class="o">.</span><span class="na">newFuture</span><span class="o">();</span>
+
+   <span class="c1">// Create a Volley request with the future as both </span>
+   <span class="c1">// success and error callbacks</span>
+
+   <span class="c1">// Add request to requestQueue instance</span>
+
+   <span class="k">return</span> <span class="n">Observable</span><span class="o">.</span><span class="na">from</span><span class="o">(</span><span class="n">future</span><span class="o">,</span> <span class="n">Schedulers</span><span class="o">.</span><span class="na">io</span><span class="o">());</span>
+<span class="o">}</span></code></pre></div>
+
+
+
+
+<p align="center"><img src="/assets/from.Future.s.png" width="650" alt="From Future" /></p>
+
+
+<p>The initial response returned from Volley will be a list of tweets which the observer will emit as a single emission to the subscribers’ onNext implementations. This is perfect for some places in our UI, so let’s keep this method.</p>
+
+<p>But what if we only wanted one tweet at a time to be emitted in another area of the application? Should we write a whole new method to handle this case? Using the composability of observables, we can simply call the flatMap operator on the observable returned by our existing method to transform the item emitted by it into a new observable of many items:</p>
+
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">getUserTweets</span><span class="o">(...)</span>
+   <span class="o">.</span><span class="na">flatMap</span><span class="o">(</span><span class="k">new</span> <span class="n">Func1</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Tweet</span><span class="o">&gt;&gt;&gt;()</span> <span class="o">{</span>
+      <span class="nd">@Override</span>
+      <span class="kd">public</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="nf">call</span><span class="o">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">Tweet</span><span class="o">&gt;&gt;</span> <span class="n">tweetList</span><span class="o">)</span> <span class="o">{</span>
+         <span class="k">return</span> <span class="n">Observable</span><span class="o">.</span><span class="na">from</span><span class="o">(</span><span class="n">tweetList</span><span class="o">);</span>
+      <span class="o">}</span>
+   <span class="o">})</span>
+   <span class="o">.</span><span class="na">subscribeOn</span><span class="o">(</span><span class="n">Schedulers</span><span class="o">.</span><span class="na">newThread</span><span class="o">())</span>
+   <span class="o">.</span><span class="na">observeOn</span><span class="o">(</span><span class="n">AndroidSchedulers</span><span class="o">.</span><span class="na">mainThread</span><span class="o">());</span></code></pre></div>
+
+
+
+
+<p align="center"><img src="/assets/flatMap.png" width="650" alt="Flat Map" /></p>
+
+
+<p>Subscribers to this version of the observable will now get each individual tweet emitted via the onNext callback. Also note that we tell the framework to do the network call associated with this observable on a background thread, but call our onNext callback on the UI thread so we can directly manipulate our UI.</p>
+
+<p>Now what if a fragment that uses this observer wants to rate-limit the emissions of this observable so it can let the user click a button to control what they see displayed? You can create a subject, which is like a proxy that acts as an observable and as a subscriber, and then have the subject emit an event every time the user clicks a button:</p>
+
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">final</span> <span class="n">PublishSubject</span><span class="o">&lt;</span><span class="n">Object</span><span class="o">&gt;</span> <span class="n">clickStream</span> <span class="o">=</span> <span class="n">PublishSubject</span><span class="o">.</span><span class="na">create</span><span class="o">();</span>
+
+<span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">button</span><span class="o">).</span><span class="na">setOnClickListener</span><span class="o">(</span><span class="k">new</span> <span class="n">View</span><span class="o">.</span><span class="na">OnClickListener</span><span class="o">()</span> <span class="o">{</span>
+   <span class="nd">@Override</span>
+   <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onClick</span><span class="o">(</span><span class="n">View</span> <span class="n">view</span><span class="o">)</span> <span class="o">{</span>
+      <span class="c1">// Emit a single object to subscribers to say a click occurred</span>
+      <span class="n">clickStream</span><span class="o">.</span><span class="na">onNext</span><span class="o">(</span><span class="k">new</span> <span class="nf">Object</span><span class="o">());</span>
+   <span class="o">}</span>
+<span class="o">});</span></code></pre></div>
+
+
+
+
+<p align="center"><img src="/assets/S.PublishSubject.png" width="650" alt="Publish Subject" /></p>
+
+
+<p>That’s all fine and good, but the Android module of RxJava comes with a really handy helper called ViewObservable that makes this even easier:</p>
+
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Observable</span> <span class="n">buttonClickObservable</span> <span class="o">=</span> 
+         <span class="n">ViewObservable</span><span class="o">.</span><span class="na">clicks</span><span class="o">(</span><span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">button1</span><span class="o">),</span> <span class="kc">false</span><span class="o">);</span></code></pre></div>
+
+
+<p>This does essentially the same thing as the PublishSubject and saves you from having to create your own OnClickListener. The boolean parameter lets you choose if the resulting Observable will emit it’s current state when it is subscribed to.</p>
+
+<p>Either of these click emitting options can then be tied to the original observer using the zip operator, which can then trigger a UI update when the button is clicked, delivering the next data element as required. Assuming we stored the flat-mapped observable into an Observable named tweetObservable:</p>
+
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Observable</span><span class="o">.</span><span class="na">zip</span><span class="o">(</span>
+   <span class="n">tweetObservable</span><span class="o">,</span>
+   <span class="n">buttonClickObservable</span><span class="o">,</span>
+   <span class="k">new</span> <span class="n">Func2</span><span class="o">&lt;</span><span class="n">Tweet</span><span class="o">,</span> <span class="n">Object</span><span class="o">,</span> <span class="n">Tweet</span><span class="o">&gt;()</span> <span class="o">{</span>
+      <span class="nd">@Override</span>
+      <span class="kd">public</span> <span class="n">Tweet</span> <span class="nf">call</span><span class="o">(</span><span class="n">Tweet</span> <span class="n">tweet</span><span class="o">,</span> <span class="n">Object</span> <span class="n">object</span><span class="o">)</span> <span class="o">{</span>
+         <span class="k">return</span> <span class="n">tweet</span><span class="o">;</span>
+      <span class="o">}</span>
+   <span class="o">})</span>
+   <span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="k">new</span> <span class="n">Action1</span><span class="o">&lt;</span><span class="n">Tweet</span><span class="o">&gt;())</span> <span class="o">{</span>
+      <span class="nd">@Override</span>
+      <span class="kd">public</span> <span class="kt">void</span> <span class="nf">call</span><span class="o">(</span><span class="n">Tweet</span> <span class="n">tweet</span><span class="o">)</span> <span class="o">{</span>
+         <span class="c1">// Update UI to display current tweet</span>
+      <span class="o">}</span>
+   <span class="o">});</span></code></pre></div>
+
+
+
+
+<p align="center"><img src="/assets/zip.png" width="650" alt="Zip" /></p>
+
+
+<p>The above is a pretty simple example of Observables, and their true power isn’t really exposed here. Observables become invaluable when you’re trying to construct a set of data from multiple endpoints and you don’t want to call them each synchronously. If you have observables already for each of the endpoints, you can quickly compose just such a reply with very little effort.</p>
+
+<p>One such example would be trying to fetch Facebook events for a particular user. We used to do a single FQL call, but the Graph API requires us to make multiple requests to get all event types. To do this with Volley you would have to add all four requests to the queue and wait for each callback to get called. You would then have to combine the results into a common list with some extra smarts in each request’s onSuccess and onError callback pair to determine if all the requests have finished and, if so, return the final result. The thought of having to jump back into this code a few months down the road to modify it or fix some strange edge case should be enough to convince anyone that there’s got to be a better way.</p>
+
+<p>Observe (sorry!) how Observables can make this complexity trivial to manage. As per our previous example, the getEventOfType() method simply creates a new Graph API call and adds it to the Volley request queue and returns an Observable tied to the request’s future:</p>
+
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="n">Observable</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">FacebookEvent</span><span class="o">&gt;&gt;</span> <span class="nf">getEvents</span><span class="o">(</span><span class="n">String</span> <span class="n">id</span><span class="o">,</span> <span class="n">String</span> <span class="n">facebookAuth</span><span class="o">)</span> <span class="o">{</span>
+      <span class="k">return</span> <span class="n">Observable</span><span class="o">.</span><span class="na">mergeDelayError</span><span class="o">(</span>
+             <span class="n">getEventOfType</span><span class="o">(</span><span class="n">PATH_EVENT_ATTENDING</span><span class="o">,</span> <span class="n">id</span><span class="o">,</span> <span class="n">facebookAuth</span><span class="o">),</span>
+             <span class="n">getEventOfType</span><span class="o">(</span><span class="n">PATH_EVENT_MAYBE</span><span class="o">,</span> <span class="n">id</span><span class="o">,</span> <span class="n">facebookAuth</span><span class="o">),</span>
+             <span class="n">getEventOfType</span><span class="o">(</span><span class="n">PATH_EVENT_DECLINED</span><span class="o">,</span> <span class="n">id</span><span class="o">,</span> <span class="n">facebookAuth</span><span class="o">),</span>
+             <span class="n">getEventOfType</span><span class="o">(</span><span class="n">PATH_EVENT_NOT_REPLIES</span><span class="o">,</span> <span class="n">id</span><span class="o">,</span> <span class="n">facebookAuth</span><span class="o">)</span>
+      <span class="o">).</span><span class="na">collect</span><span class="o">(</span><span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">FacebookEvent</span><span class="o">&gt;(),</span> 
+             <span class="k">new</span> <span class="n">Action2</span><span class="o">&lt;</span><span class="n">List</span><span class="o">&lt;</span><span class="n">FacebookEvent</span><span class="o">&gt;,</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">FacebookEvent</span><span class="o">&gt;&gt;()</span> <span class="o">{</span>
+                <span class="nd">@Override</span>
+                <span class="kd">public</span> <span class="kt">void</span> <span class="nf">call</span><span class="o">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">FacebookEvent</span><span class="o">&gt;</span> <span class="n">output</span><span class="o">,</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">FacebookEvent</span><span class="o">&gt;</span> <span class="n">input</span><span class="o">)</span> <span class="o">{</span>
+                   <span class="n">output</span><span class="o">.</span><span class="na">addAll</span><span class="o">(</span><span class="n">input</span><span class="o">);</span>
+                <span class="o">}</span>
+             <span class="o">});</span>
+   <span class="o">}</span></code></pre></div>
+
+
+
+
+<p align="center"><img src="/assets/mergeDelayError.png" width="650" alt="Merge Delay Error" /></p>
+
+
+<p>Here we use the mergeDelayError operator to compose a new Observable. The standard merge operator will just take all emitted items of all provided Observables into a new single stream. The issue with a normal merge is that if a provided Observable emits an error, it will trigger the onError callback for the subscriber and then not emit anything else that comes in afterwards. mergeDelayError will delay the emission of any errors until all other Observables complete or error out themselves. This is another huge help for making easy to maintain code that handles a wide number of edge cases.</p>
+
+<p align="center"><img src="/assets/collect.png" width="650" alt="Collect" /></p>
+
+
+<p>We also are using the operator collect to combine the results of each of the separate network calls. Without doing so, we would get a separate emission of a list for each successful response. If we used flatMap, it would be a separate emission of each event. Collect allows us to build up a single collection and emit that as a single response.</p>
+
+<p>Unfortunately, the syntax for anonymous methods is pretty gnarly as we don’t have lambda support yet in Android. Adventurous developers could try using the Retrolambda library, which backports lambdas all the way back to Java5, but we’ve decided to hold off on using Retrolambda in production code until we can test it more thoroughly.</p>
+
+<p>In summary, using observables in conjunction with networking calls lets you write very broad network requests that can easily be re-used in a wide number of ways throughout your app, with very little code modification required. They also allow you to write extremely complex asynchronous actions in a very readable and maintainable way.</p>
+
+<h3>Sources/Further Learning:</h3>
+
+
+<p><a href="https://github.com/ReactiveX/RxJava/wiki/The-RxJava-Android-Module">RxJava for Android</a><br>
+<a href="http://www.youtube.com/watch?v=_t06LRX0DV0">Netflix talk re: Functional Reactive Programing</a><br>
+<a href="https://gist.github.com/staltz/868e7e9bc2a7b8c1f754">Introduction to Reactive Programming</a><br>
+<a href="https://www.youtube.com/watch?v=aEuNBk1b5OE#t=2480">Rx and Retrofit Presentation by Jake Wharton</a><br></p>
+
+</div>
+
+<div class="related">
+  <h2>Related Posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/2014/04/12/animating-a-header-out-of-a-listview/">
+            Animating a header out of a ListView
+            <small>12 Apr 2014</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/2014/04/11/what-did-you-do-to-my-padding/">
+            Hey setBackgroundResource(), what did you do to my padding?
+            <small>11 Apr 2014</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/2014/04/10/purpose-and-direction/">
+            Purpose and direction
+            <small>10 Apr 2014</small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</div>
+
+    </div>
+
+  </body>
+</html>

@@ -49,7 +49,7 @@
 
 <p>Well, since the nine patches define their own padding, Android correctly stomped out my XML padding and used the nine patchs' own settings. In this case, I didn't want to create a custom nine patch just for this one view so I simply stored the padding values before setting the drawable and reapplied them afterwards.</p>
 
-<div class="highlight"><pre><code class="java"><span class="kd">private</span> <span class="kt">void</span> <span class="nf">setBackgroundResourceAndKeepPadding</span><span class="o">(</span><span class="n">View</span> <span class="n">view</span><span class="o">,</span> <span class="kt">int</span> <span class="n">resourceId</span><span class="o">)</span> <span class="o">{</span>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">private</span> <span class="kt">void</span> <span class="nf">setBackgroundResourceAndKeepPadding</span><span class="o">(</span><span class="n">View</span> <span class="n">view</span><span class="o">,</span> <span class="kt">int</span> <span class="n">resourceId</span><span class="o">)</span> <span class="o">{</span>
     <span class="kt">int</span> <span class="n">left</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="na">getPaddingLeft</span><span class="o">();</span>
     <span class="kt">int</span> <span class="n">right</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="na">getPaddingRight</span><span class="o">();</span>
     <span class="kt">int</span> <span class="n">top</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="na">getPaddingTop</span><span class="o">();</span>
@@ -57,8 +57,7 @@
 
     <span class="n">view</span><span class="o">.</span><span class="na">setBackgroundResource</span><span class="o">(</span><span class="n">resourceId</span><span class="o">);</span>
     <span class="n">view</span><span class="o">.</span><span class="na">setPadding</span><span class="o">(</span><span class="n">left</span><span class="o">,</span> <span class="n">top</span><span class="o">,</span> <span class="n">right</span><span class="o">,</span> <span class="n">bottom</span><span class="o">);</span>
-<span class="o">}</span>
-</code></pre></div>
+<span class="o">}</span></code></pre></div>
 
 
 </div>
@@ -66,6 +65,15 @@
 <div class="related">
   <h2>Related Posts</h2>
   <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/2014/10/30/observing-observables/">
+            Observing Observables in Mobile with RxJava for Android
+            <small>30 Oct 2014</small>
+          </a>
+        </h3>
+      </li>
     
       <li>
         <h3>
